@@ -89,3 +89,17 @@ services:
       - "8080:8080"
     networks:
       - data-platform
+
+  spark:
+    image: ${SPARK_IMAGE:-apache/spark:3.5.1-python3}
+    container_name: de-spark
+    profiles: ["batch"]
+    user: root
+    working_dir: /app
+    environment:
+      HOME: /tmp
+    volumes:
+      - ./batch:/app/batch
+      - ./data:/data
+    networks:
+      - data-platform
