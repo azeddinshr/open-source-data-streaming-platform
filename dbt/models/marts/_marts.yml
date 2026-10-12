@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: fct_events_hourly
+    description: "Event counts per hour, event type and bot flag. Incremental with a 3h lookback."
+    columns:
+      - name: hour_key
+        tests: [unique, not_null]
+      - name: event_hour
+        tests: [not_null]
+      - name: event_count
+        tests: [not_null]
+
+  - name: mart_repo_activity
+    description: "One row per repository with activity totals, for dashboards."
+    columns:
+      - name: repo_name
+        tests: [unique, not_null]
+      - name: total_events
+        tests: [not_null]

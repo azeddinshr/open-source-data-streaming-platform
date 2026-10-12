@@ -1,0 +1,13 @@
+github_platform:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DBT_PG_HOST', 'localhost') }}"
+      port: 5432
+      user: de_user
+      password: "{{ env_var('DBT_PG_PASSWORD', 'de_password') }}"
+      dbname: analytics
+      schema: analytics
+      threads: 4
+      

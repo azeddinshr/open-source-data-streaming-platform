@@ -1,0 +1,15 @@
+name: github_platform
+version: "1.0.0"
+profile: github_platform
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+
+models:
+  github_platform:
+    staging:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table
+      +schema: marts

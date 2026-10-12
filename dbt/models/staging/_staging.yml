@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: stg_github_events
+    description: "One row per GitHub event, parsed from the raw JSONB payload."
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: event_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - PushEvent
+                  - PullRequestEvent
+                  - IssueCommentEvent
+                  - PullRequestReviewEvent
+                  - IssuesEvent
+                  - CreateEvent
+                  - PullRequestReviewCommentEvent
+                  - ReleaseEvent
+                  - DeleteEvent
+                  - WatchEvent
+                  - ForkEvent
+                  - PublicEvent
+                  - MemberEvent
+                  - GollumEvent
+                  - CommitCommentEvent
+                  - DiscussionEvent
+              config:
+                severity: warn
+      - name: repo_name
+        tests:
+          - not_null
+      - name: created_at
+        tests:
+          - not_null
