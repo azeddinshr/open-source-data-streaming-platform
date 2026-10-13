@@ -153,3 +153,28 @@ services:
     restart: unless-stopped
     networks:
       - data-platform
+  
+  airflow:
+    build:
+      context: .
+      dockerfile: orchestration/Dockerfile
+    container_name: de-airflow
+    command: ["bash", "-c", "airflow db migrate && exec airflow standalone"]
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+      AIRFLOW__API_AUTH__JWT_SECRET: local-dev-only-secret-change-me-0123456789abcdef
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://de_user:de_password@postgres:5432/airflow
+      AIRFLOW_CONN_ANALYTICS_PG: postgresql://de_user:de_password@postgres:5432/analytics
+    ports:
+      - "8085:8080"
+    volumes:
+      - ./orchestration/dags:/opt/airflow/dags
+      - ./batch:/opt/airflow/batch
+      - ./dbt:/opt/airflow/dbt
+      - ./data:/data
+    depends_on:
+      - postgres
+    networks:
+      - data-platform

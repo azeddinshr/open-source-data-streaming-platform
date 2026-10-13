@@ -1,7 +1,7 @@
 import argparse
 import logging
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import requests
@@ -37,8 +37,7 @@ def download_hour(hour, session):
                     return None
                 resp.raise_for_status()
                 with open(tmp, "wb") as f:
-                    for chunk in resp.iter_content(chunk_size=1 << 20):
-                        f.write(chunk)
+                    f.writelines(resp.iter_content(chunk_size=1 << 20))
             tmp.rename(target)  # atomic: never leave half-written files
             log.info("Downloaded %s (%.1f MB)", name, target.stat().st_size / 1e6)
             return target
@@ -48,7 +47,7 @@ def download_hour(hour, session):
 
 
 def parse_hour(value):
-    return datetime.strptime(value, "%Y-%m-%dT%H").replace(tzinfo=timezone.utc)
+    return datetime.strptime(value, "%Y-%m-%dT%H").replace(tzinfo=UTC)
 
 
 def main():
@@ -58,9 +57,15 @@ def main():
     args = parser.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    failures = 0
     with requests.Session() as session:
         for hour in hour_range(parse_hour(args.start), parse_hour(args.end)):
-            download_hour(hour, session)
+            if download_hour(hour, session) is None:
+                failures += 1
+
+    if failures:
+        log.error("%d hour(s) could not be downloaded", failures)
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":

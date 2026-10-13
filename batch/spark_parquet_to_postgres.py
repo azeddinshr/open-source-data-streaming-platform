@@ -16,6 +16,7 @@ PG_PASSWORD = os.getenv("PG_PASSWORD", "de_password")
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", default="/data/parquet/gharchive_events")
+    parser.add_argument("--base-path", default=None)
     args = parser.parse_args()
 
     spark = (
@@ -25,7 +26,11 @@ def main():
     )
     spark.sparkContext.setLogLevel("WARN")
 
-    df = spark.read.parquet(args.input)
+    # df = spark.read.parquet(args.input)
+    reader = spark.read
+    if args.base_path:
+        reader = reader.option("basePath", args.base_path)
+    df = reader.parquet(args.input)
     rows = df.count()
     log.info("Writing %d rows to raw.gharchive_events_staging", rows)
 

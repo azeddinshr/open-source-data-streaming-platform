@@ -5,7 +5,7 @@ import signal
 import sys
 import time
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import requests
 from confluent_kafka import Producer
@@ -171,7 +171,7 @@ def main():
         if events:
             # oldest first so offsets roughly follow event time
             new_events = [e for e in reversed(events) if e["id"] not in seen]
-            ingested_at = datetime.now(timezone.utc).isoformat()
+            ingested_at = datetime.now(UTC).isoformat()
 
             for event in new_events:
                 seen.add(event["id"])
