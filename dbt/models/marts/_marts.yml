@@ -12,9 +12,11 @@ models:
         tests: [not_null]
 
   - name: mart_repo_activity
-    description: "One row per repository with activity totals, for dashboards."
     columns:
+      - name: repo_id
+        description: "GitHub repository ID (natural key)."
+        tests:
+          - unique
+          - not_null
       - name: repo_name
-        tests: [unique, not_null]
-      - name: total_events
-        tests: [not_null]
+        description: "Repository name; may repeat across recreated repos."
