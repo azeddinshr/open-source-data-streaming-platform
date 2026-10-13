@@ -21,6 +21,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/sql:/docker-entrypoint-initdb.d:ro
     networks:
       - data-platform
 
@@ -101,5 +102,54 @@ services:
     volumes:
       - ./batch:/app/batch
       - ./data:/data
+    networks:
+      - data-platform
+
+  redpanda-init:
+    image: docker.redpanda.com/redpandadata/redpanda:v26.2.4
+    container_name: de-redpanda-init
+    depends_on:
+      - redpanda
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until rpk -X brokers=redpanda:9092 cluster info >/dev/null 2>&1; do sleep 2; done
+        rpk -X brokers=redpanda:9092 topic create github-events -p 1 -r 1 || true
+        rpk -X brokers=redpanda:9092 topic create github-events-dlq -p 1 -r 1 || true
+    networks:
+      - data-platform
+
+  producer:
+    build:
+      context: .
+      dockerfile: ingestion/Dockerfile
+    container_name: de-producer
+    command: ["python", "ingestion/producer.py"]
+    environment:
+      KAFKA_BROKER: redpanda:9092
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - data-platform
+
+  consumer:
+    build:
+      context: .
+      dockerfile: ingestion/Dockerfile
+    container_name: de-consumer
+    command: ["python", "ingestion/raw_consumer.py"]
+    environment:
+      KAFKA_BROKER: redpanda:9092
+      POSTGRES_DSN: host=postgres port=5432 dbname=analytics user=de_user password=de_password
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started
+    restart: unless-stopped
     networks:
       - data-platform

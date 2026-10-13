@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: fct_events_unified
+    description: "All events from stream and archive, one row per event_id, with source flags."
+    columns:
+      - name: event_id
+        tests: [unique, not_null]
+      - name: event_type
+        tests: [not_null]
+      - name: created_at
+        tests: [not_null]
+
+  - name: mart_source_reconciliation
+    description: "Per hour and event type: how the stream compares with the archive. Open question: see README."
+    columns:
+      - name: event_hour
+        tests: [not_null]

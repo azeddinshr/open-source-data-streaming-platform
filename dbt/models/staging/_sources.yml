@@ -5,12 +5,21 @@ sources:
     schema: raw
     tables:
       - name: github_events
+        description: "Stream path: GitHub Events API via Redpanda."
         loaded_at_field: loaded_at
         freshness:
           warn_after: { count: 1, period: hour }
           error_after: { count: 24, period: hour }
         columns:
           - name: event_id
-            tests:
-              - unique
-              - not_null
+            tests: [unique, not_null]
+
+      - name: gharchive_events
+        description: "Batch path: hourly GH Archive files processed by Spark."
+        loaded_at_field: loaded_at
+        freshness:
+          warn_after: { count: 36, period: hour }
+          error_after: { count: 72, period: hour }
+        columns:
+          - name: event_id
+            tests: [unique, not_null]

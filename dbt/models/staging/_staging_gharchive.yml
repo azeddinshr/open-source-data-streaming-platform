@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_gharchive_events
+    description: "One row per GH Archive event, typed and enriched."
+    columns:
+      - name: event_id
+        tests: [unique, not_null]
+      - name: event_type
+        tests: [not_null]
+      - name: repo_name
+        tests: [not_null]
+      - name: created_at
+        tests: [not_null]
