@@ -10,24 +10,7 @@ The goal was not just to move data but to treat ingestion like production code: 
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    GH[GitHub Events API] -->|poll with ETag| P[Producer]
-    P --> RP[(Redpanda)]
-    RP --> C[Consumer]
-    RP --> F[Flink SQL]
-    C --> RAW[(Postgres raw)]
-    F --> STR[(Postgres streaming)]
-    GA[GH Archive] --> DL[Downloader]
-    DL --> SP[Spark]
-    SP --> PQ[Parquet]
-    PQ --> RAW
-    AF{{Airflow}} -.orchestrates.-> DL
-    RAW --> DBT[dbt]
-    DBT --> MARTS[(Postgres marts)]
-    MARTS --> MB[Metabase]
-    STR --> MB
-```
+![Architecture](docs/images/architecture.png)
 
 ## Stack
 
